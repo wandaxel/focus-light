@@ -1,0 +1,1164 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>focus-light</title>
+<style>
+:root{--bg:#08090c;--card:#101419;--card2:#0c1014;--line:#1e252d;--ink:#e9edf1;
+      --dim:#818b99;--acc:#5b8dd9;--warn:#e0a458;--ok:#2ea043;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;padding:20px 16px 56px;background:var(--bg);color:var(--ink);
+     font:14px/1.5 ui-sans-serif,-apple-system,system-ui,sans-serif}
+.app{max-width:560px;margin:0 auto}
+
+/* ---------- entête ---------- */
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top h1{font-size:15px;font-weight:600;margin:0;flex:1}
+.pill{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;
+  background:var(--card);border:1px solid var(--line);cursor:pointer;font-size:12px;
+  color:var(--dim);white-space:nowrap}
+.pill:hover{border-color:var(--acc)}
+.pill i{width:8px;height:8px;border-radius:50%;background:#3a424c;flex:0 0 auto}
+.pill.up i{background:var(--ok);box-shadow:0 0 9px var(--ok)}
+.pill.up{color:var(--ink)}
+
+/* ---------- onglets ---------- */
+.view{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;
+  background:var(--card2);padding:5px;border-radius:12px;border:1px solid var(--line)}
+.view button{padding:10px;border:0;border-radius:8px;background:transparent;
+  color:var(--dim);cursor:pointer;font-size:14px;font-weight:500}
+.view button.on{background:#1d2836;color:var(--ink)}
+
+/* ---------- scène ---------- */
+.stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+#main{display:block;background:#05070a;border-radius:12px;width:100%;
+      max-width:340px;margin:0 auto;aspect-ratio:1}
+.meta{display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:11.5px;
+      color:var(--dim);flex-wrap:wrap}
+.meta b{color:var(--ink);font-weight:600}
+.meta b.hot{color:var(--warn)}
+
+/* ---------- niveaux ---------- */
+.lvls{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:16px}
+.lvls button{padding:12px 3px 10px;border:1px solid var(--line);border-radius:12px;
+  background:var(--card);color:var(--dim);cursor:pointer;display:flex;
+  flex-direction:column;align-items:center;gap:7px;font-size:10.5px;font-weight:500}
+.lvls button i{width:15px;height:15px;border-radius:50%;display:block;transition:box-shadow .2s}
+.lvls button.on{color:var(--ink);border-color:var(--acc);background:#16202b}
+.lvls button.on i{box-shadow:0 0 13px currentColor}
+
+.field{margin-top:12px}
+input[type=text]{width:100%;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:15px}
+input[type=text]::placeholder{color:#59636f}
+input[type=text]:focus{outline:0;border-color:var(--acc)}
+
+.slider{display:flex;align-items:center;gap:11px;margin-top:14px}
+.slider label{flex:0 0 88px;color:var(--dim);font-size:12.5px}
+input[type=range]{flex:1;accent-color:var(--acc);min-width:0}
+.val{flex:0 0 52px;text-align:right;font:11.5px ui-monospace,monospace;color:var(--dim)}
+
+/* ---------- galerie emoji ---------- */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px;
+  margin-top:16px}
+.gal figure{margin:0;text-align:center;cursor:pointer;padding:4px;border-radius:10px;
+  border:1px solid transparent}
+.gal figure:hover{border-color:#2a323b;background:var(--card)}
+.gal figure.on{border-color:var(--acc);background:#16202b}
+.gal canvas{width:100%;border-radius:7px;aspect-ratio:1;display:block}
+.gal figcaption{font-size:9.5px;color:var(--dim);margin-top:4px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- sections repliables ---------- */
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  margin-top:10px;overflow:hidden}
+details[open]{border-color:#28313b}
+summary{padding:14px 16px;cursor:pointer;font-size:13.5px;font-weight:500;
+  list-style:none;display:flex;align-items:center;gap:10px;color:var(--ink)}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"";width:6px;height:6px;border-right:1.6px solid var(--dim);
+  border-bottom:1.6px solid var(--dim);transform:rotate(-45deg);transition:transform .18s;
+  margin-left:2px;flex:0 0 auto}
+details[open] summary::before{transform:rotate(45deg)}
+summary span{color:var(--dim);font-size:11.5px;font-weight:400;margin-left:auto}
+.body{padding:2px 16px 16px}
+
+.row{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.row>label{flex:0 0 92px;color:var(--dim);font-size:12.5px}
+select{flex:1;background:var(--card2);color:var(--ink);border:1px solid var(--line);
+  border-radius:9px;padding:9px;font-size:13px;min-width:0}
+input[type=color]{width:100%;height:32px;padding:0;border:1px solid var(--line);
+  border-radius:8px;background:none;cursor:pointer}
+.stops{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.stops span{font-size:10px;color:var(--dim);display:block;margin-bottom:4px;text-align:center}
+.seg{display:flex;gap:5px;flex:1}
+.seg button,.mode button{flex:1;padding:9px 3px;border:1px solid var(--line);
+  border-radius:8px;background:var(--card2);color:var(--dim);cursor:pointer;font-size:12px}
+.seg button.on,.mode button.on{background:#1d2836;color:var(--ink);border-color:var(--acc)}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:11px}
+.chk{display:flex;align-items:center;gap:9px;margin-bottom:11px;font-size:13px;cursor:pointer}
+.chk input{accent-color:var(--acc);width:15px;height:15px;flex:0 0 auto}
+.btn{width:100%;padding:11px;margin-top:8px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card2);color:var(--ink);cursor:pointer;font-size:13px}
+.btn:hover{border-color:var(--acc)}
+pre{background:#05070a;border:1px solid var(--line);border-radius:9px;padding:12px;
+  overflow:auto;font:10.5px/1.45 ui-monospace,monospace;color:#93a9be;margin:0;max-height:220px}
+.note{color:var(--dim);font-size:11.5px;margin:10px 0 0;line-height:1.5}
+canvas.panelw{width:100%;border-radius:9px;background:#05070a;display:block}
+.cmp{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.cmp figure{margin:0;text-align:center}
+.cmp canvas{width:100%;border-radius:8px;aspect-ratio:1;background:#05070a}
+.cmp figcaption{font-size:9.5px;color:var(--dim);margin-top:4px}
+#edit{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;background:#05070a;
+  padding:6px;border-radius:9px}
+#edit div{aspect-ratio:1;border-radius:2px;cursor:pointer;background:#15191e}
+.sw{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.sw button{width:32px;height:28px;border-radius:7px;border:2px solid transparent;cursor:pointer}
+.sw button.on{border-color:var(--ink)}
+[hidden]{display:none !important}
+</style>
+
+<div class="app">
+
+  <div class="top">
+    <h1>focus-light</h1>
+    <div class="pill" id="conn"><i></i><span id="serStat">connecter la carte</span></div>
+  </div>
+
+  <div class="view" id="viewSeg" style="grid-template-columns:1fr 1fr 1fr">
+    <button data-v="anim" class="on">Animations</button>
+    <button data-v="emoji">Emoji</button>
+    <button data-v="clock">Horloge</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="main" width="760" height="760"></canvas>
+    <div class="meta">
+      <span id="curName">—</span>
+      <span>courant <b id="mA">—</b></span>
+      <span>pic <b id="pk">—</b></span>
+      <span>fps <b id="fps">—</b></span>
+    </div>
+  </div>
+
+  <!-- ===== principal : animations ===== -->
+  <div id="primAnim">
+    <div class="lvls" id="lvls"></div>
+    <div class="field"><input type="text" id="task" maxlength="48"
+      placeholder="Sur quoi je travaille…" value="Montage épisode 12"></div>
+  </div>
+
+  <!-- ===== principal : emoji ===== -->
+  <div id="primEmoji" hidden>
+    <div class="gal" id="gal"></div>
+  </div>
+
+  <!-- ===== principal : horloge ===== -->
+  <div id="primClock" hidden>
+    <div class="lvls" id="clockModes" style="grid-template-columns:repeat(5,1fr)"></div>
+    <div class="slider" style="margin-top:14px">
+      <label>Heure</label>
+      <div style="flex:1;font:22px/1 ui-monospace,monospace;letter-spacing:.05em"
+           id="clockNow">--:--:--</div>
+      <span class="val" id="clockTz"></span>
+    </div>
+  </div>
+
+  <div class="slider">
+    <label>Luminosité</label>
+    <input type="range" id="bri" min="3" max="100" value="35"><span class="val" id="vbri"></span>
+  </div>
+
+  <!-- ===== sections repliées ===== -->
+
+  <details id="dSerial">
+    <summary>Carte branchée <span id="sumSerial">déconnectée</span></summary>
+    <div class="body">
+      <label class="chk"><input type="checkbox" id="live" checked>
+        Diffuser les trames en direct</label>
+      <label class="chk"><input type="checkbox" id="hold" checked>
+        Continuer à tourner quand je quitte l'onglet</label>
+      <button class="btn" id="push">Enregistrer les réglages sur la carte</button>
+      <button class="btn" id="disc">Déconnecter</button>
+      <p class="note">Le navigateur gèle l'animation dès que l'onglet passe en
+        arrière-plan. La page rend alors la main à la carte, qui poursuit avec
+        ses propres réglages. Décoche pour qu'elle s'éteigne après 30 s.</p>
+      <p class="note">Trames en hexadécimal avec somme de contrôle, jamais en
+        binaire : un octet 0x03 serait pris pour un Ctrl-C. Chrome ou Edge,
+        Safari ne gère pas Web Serial.</p>
+    </div>
+  </details>
+
+  <details id="dAnim">
+    <summary>Réglage de l'animation <span id="sumAnim"></span></summary>
+    <div class="body">
+      <div class="seg" id="tabs" style="margin-bottom:13px"></div>
+      <div class="row"><label>Motif</label><select id="anim"></select></div>
+      <div class="row"><label>Vitesse</label><input type="range" id="speed" min="5" max="400" value="100"><span class="val" id="vspeed"></span></div>
+      <div class="row"><label>Amplitude</label><input type="range" id="amp" min="0" max="100" value="70"><span class="val" id="vamp"></span></div>
+      <div class="row"><label>Contraste</label><input type="range" id="ctr" min="20" max="250" value="100"><span class="val" id="vctr"></span></div>
+      <div class="row"><label>Respiration</label><input type="range" id="bp" min="0" max="200" value="0"><span class="val" id="vbp"></span></div>
+      <div class="row"><label>Profondeur</label><input type="range" id="bd" min="0" max="80" value="0"><span class="val" id="vbd"></span></div>
+      <div class="stops" style="margin-top:14px">
+        <div><span>creux</span><input type="color" id="c0"></div>
+        <div><span>milieu</span><input type="color" id="c1"></div>
+        <div><span>crête</span><input type="color" id="c2"></div>
+      </div>
+    </div>
+  </details>
+
+  <details id="dOptic">
+    <summary>Optique <span id="sumOptic">dalle nue</span></summary>
+    <div class="body">
+      <div class="mode" id="modeSeg">
+        <button data-v="panel" class="on">Dalle nue</button>
+        <button data-v="dome">Dôme diffusant</button>
+      </div>
+      <div class="row" id="sigRow" hidden><label>Taille dôme</label>
+        <input type="range" id="sig" min="20" max="320" value="150"><span class="val" id="vsig"></span></div>
+      <p class="note" id="sigNote" hidden></p>
+      <div class="row" id="prgRow"><label>Jauge</label>
+        <input type="range" id="prg" min="0" max="100" value="62"><span class="val" id="vprg"></span></div>
+      <label class="chk" id="ringRow"><input type="checkbox" id="ring" checked>
+        Anneau de progression</label>
+      <div class="row"><label>Durée</label>
+        <input type="range" id="dur" min="5" max="180" value="50"><span class="val" id="vdur"></span></div>
+    </div>
+  </details>
+
+  <details id="dEmoji" hidden>
+    <summary>Éditeur de glyphe <span id="sumEmoji"></span></summary>
+    <div class="body">
+      <div class="row"><label>Vitesse</label>
+        <input type="range" id="espd" min="10" max="300" value="100"><span class="val" id="vespd"></span></div>
+      <label class="chk"><input type="checkbox" id="eanim" checked> Animer</label>
+      <label class="chk"><input type="checkbox" id="epkg" checked> Boîtiers LED visibles</label>
+      <div id="edit" style="margin-top:12px"></div>
+      <div class="sw" id="sw"></div>
+      <p class="note">Le premier échantillon, hachuré, éteint le pixel.
+        L'édition porte sur l'image affichée et part aussitôt sur la carte.</p>
+      <button class="btn" id="eReset">Recharger l'original</button>
+    </div>
+  </details>
+
+  <details id="dClock" hidden>
+    <summary>Horloge <span id="sumClock"></span></summary>
+    <div class="body">
+      <div class="row"><label>Teinte</label><div class="seg" id="clockTint">
+        <button data-v="level">Suit le niveau</button>
+        <button data-v="fixed" class="on">Fixe</button></div></div>
+      <div class="stops" id="clockStops">
+        <div><span>heures</span><input type="color" id="k0" value="#f09614"></div>
+        <div><span>minutes</span><input type="color" id="k1" value="#466eff"></div>
+        <div><span>recouvrement</span><input type="color" id="k2" value="#f0f0ff"></div>
+      </div>
+      <p class="note">Ambre et bleu ne sont pas un choix esthétique : c'est le
+        seul couple qui reste lisible en vision daltonienne. L'axe bleu-jaune
+        est préservé en deutéranopie comme en protanopie, qui touchent 8 % des
+        hommes. Rouge et vert s'effondrerait de 289 à 162 de séparation.</p>
+      <label class="chk" style="margin-top:12px"><input type="checkbox" id="sec24" checked>
+        Format 24 h</label>
+      <button class="btn" id="syncTime">Envoyer l'heure à la carte</button>
+      <p class="note">L'ESP32 n'a pas de pile RTC : sans Wi-Fi, il perd l'heure à
+        chaque coupure. Ce bouton la lui pousse par l'USB. Avec le Wi-Fi
+        configuré, il se resynchronise seul par NTP toutes les heures.</p>
+      <p class="note">Le passage heure d'été / heure d'hiver est calculé à bord
+        selon la règle européenne — dernier dimanche de mars et d'octobre à
+        01:00 UTC — vérifié sans écart sur cinq ans.</p>
+    </div>
+  </details>
+
+  <details id="dHw">
+    <summary>Matériel et calibration <span id="sumHw"></span></summary>
+    <div class="body">
+      <div class="row"><label>Câblage</label><div class="seg" id="mapSeg">
+        <button data-v="row" class="on">Lignes</button><button data-v="snake">Serpentin</button></div></div>
+      <div class="row"><label>Rotation</label><div class="seg" id="rotSeg">
+        <button data-v="0" class="on">0°</button><button data-v="90">90°</button>
+        <button data-v="180">180°</button><button data-v="270">270°</button></div></div>
+      <label class="chk"><input type="checkbox" id="chase"> Chenillard de test</label>
+      <p class="note">Lance le chenillard ici et <code>main.test_chase()</code> sur
+        la carte. S'ils n'avancent pas pareil, change le câblage.</p>
+      <button class="btn" id="reset">Réglages d'usine</button>
+    </div>
+  </details>
+
+  <details id="dAnalyse">
+    <summary>Analyse <span>rythme et comparaison</span></summary>
+    <div class="body">
+      <canvas id="rhythm" class="panelw" width="1000" height="192"
+        style="height:88px;margin-bottom:8px"></canvas>
+      <p class="note" style="margin-top:0">Sous un diffuseur le motif disparaît :
+        c'est le rythme qui porte le signal. Des courbes séparées restent
+        lisibles par un collègue daltonien.</p>
+      <div class="cmp" id="cmp" style="margin-top:14px"></div>
+    </div>
+  </details>
+
+  <details id="dExport">
+    <summary>Export MicroPython <span>constantes</span></summary>
+    <div class="body">
+      <pre id="out"></pre>
+      <button class="btn" id="copy">Copier</button>
+    </div>
+  </details>
+
+</div>
+
+<script>
+// ===========================================================================
+//  Noyau
+// ===========================================================================
+const N=8, clamp=(v,a,b)=>v<a?a:v>b?b:v, smooth=t=>t*t*(3-2*t);
+const gauss=(p,c,w)=>Math.exp(-Math.pow((p-c)/w,2));
+const RAD=(x,y)=>Math.hypot(x-3.5,y-3.5)/4.95;
+const hex2rgb=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const rgb2hex=c=>"#"+c.map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,"0")).join("");
+
+function hash3(i,j,k){
+  let n=(i*374761393+j*668265263+k*1274126177)|0;
+  n=(n^(n>>>13))|0; n=Math.imul(n,1274126177)|0;
+  return ((n^(n>>>16))>>>0)/4294967295;
+}
+function noise3(x,y,z){
+  const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(z);
+  const xf=smooth(x-xi),yf=smooth(y-yi),zf=smooth(z-zi);
+  let a=0;
+  for(let dz=0;dz<2;dz++)for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++)
+    a+=(dx?xf:1-xf)*(dy?yf:1-yf)*(dz?zf:1-zf)*hash3(xi+dx,yi+dy,zi+dz);
+  return a;
+}
+function rot(x,y,d){const m=N-1;
+  return d===90?[y,m-x]:d===180?[m-x,m-y]:d===270?[m-y,x]:[x,y]}
+function ledIndex(x,y,m){return m==="snake"?y*N+(y%2?N-1-x:x):y*N+x}
+const RING=(()=>{const r=[];for(let x=0;x<N;x++)r.push([x,0]);
+  for(let y=1;y<N;y++)r.push([N-1,y]);for(let x=N-2;x>=0;x--)r.push([x,N-1]);
+  for(let y=N-2;y>=1;y--)r.push([0,y]);return r})();
+const currentMa=b=>Math.round(b.reduce((s,p)=>s+(p[0]+p[1]+p[2])/255*20+1,0));
+const meanLum=b=>b.reduce((s,p)=>s+(p[0]+p[1]+p[2])/3,0)/64;
+
+// ===========================================================================
+//  Animations
+// ===========================================================================
+const ANIMS_PANEL={
+  aurora:(x,y,t,a)=>{const c=3.5+2.2*a*Math.sin(x*.55+t*.45)+1.1*a*Math.sin(x*.27-t*.62);
+    return clamp(1-Math.abs(y-c)/3.4,0,1)},
+  ember:(x,y,t,a)=>clamp((1-y/7)*(1-a*.7+a*1.4*noise3(x*.45,y*.3,t*.55)),0,1),
+  plasma:(x,y,t,a)=>clamp(.5+((Math.sin(x*.6+t*.8)+Math.sin(y*.5-t*.55)
+    +Math.sin((x+y)*.38+t*.42))/6)*(.4+a*1.6),0,1),
+  drift:(x,y,t,a)=>clamp((noise3(x*.32+t*.12,y*.32,t*.2)-.5)*(1+a*2.2)+.5,0,1),
+  breath:(x,y,t,a)=>clamp(1-RAD(x,y)+a*(.5*Math.sin(t*.9))*1.4,0,1),
+  wave:(x,y,t,a)=>clamp(.5+Math.sin((x+y)*.62-t*1.1)*(.15+a*.35),0,1),
+  rings:(x,y,t,a)=>clamp(.5+Math.sin(RAD(x,y)*4.95*1.5-t*1.6)*(.18+a*.32),0,1),
+  spiral:(x,y,t,a)=>clamp(.5+Math.sin(Math.atan2(y-3.5,x-3.5)*2
+    +RAD(x,y)*4.95*.7-t*.9)*(.18+a*.32),0,1),
+  scan:(x,y,t,a)=>clamp(1-Math.abs(y-(((t*.35)%1)*(N+4)-2))/(1.2+a*2.8),0,1),
+  gradient:(x,y,t,a)=>clamp(1-y/7+a*.18*Math.sin(t*.7+x*.5),0,1),
+  solid:(x,y,t,a)=>clamp(.82+a*.18*Math.sin(t*.6),0,1),
+};
+// Radialement symétriques : sous un dôme, toute structure azimutale rendrait
+// le signal dépendant de l'endroit où l'on se tient.
+const ANIMS_DOME={
+  pulse:(x,y,t,a)=>clamp(.55+.45*a*Math.sin(t*.9)+(1-a)*.2,0,1),
+  swell:(x,y,t,a)=>{const p=(t*.35)%1;
+    return clamp(.15+.85*(p<.72?smooth(p/.72):1-smooth((p-.72)/.28))*a+(1-a)*.5,0,1)},
+  heartbeat:(x,y,t,a)=>{const p=(t*.45)%1;
+    return clamp(.18+.82*(gauss(p,.06,.05)+.75*gauss(p,.20,.055))*a+(1-a)*.4,0,1)},
+  candle:(x,y,t,a)=>clamp(.62+.38*a*(noise3(0,0,t*.7)*2-1),0,1),
+  ripple:(x,y,t,a)=>clamp(.5+.5*Math.sin(RAD(x,y)*3-t)*(.3+a*.7),0,1),
+  halo:(x,y,t,a)=>clamp(1-RAD(x,y)*(.5+a*.5)+a*.25*Math.sin(t*.8),0,1),
+  steady:(x,y,t,a)=>clamp(.88+a*.06*Math.sin(t*.4),0,1),
+};
+const FR={aurora:"Aurore (rideaux)",ember:"Braises",plasma:"Plasma",
+  drift:"Dérive organique",breath:"Respiration radiale",wave:"Houle diagonale",
+  rings:"Anneaux",spiral:"Spirale",scan:"Balayage",gradient:"Dégradé vertical",
+  solid:"Uniforme",pulse:"Pulsation",swell:"Houle lente",heartbeat:"Battement de cœur",
+  candle:"Bougie",ripple:"Ondes concentriques",halo:"Halo",steady:"Veilleuse"};
+
+// ===========================================================================
+//  Emoji — 25 glyphes
+// ===========================================================================
+const E={
+ casque:{n:"Casque",pal:["#cfd6e2","#e5484d"],f:[[
+  "..0000..",".0....0.","0......0","0......0","11....11","11....11","11....11","........"]]},
+ sourire:{n:"Sourire",pal:["#ffd93d"],f:[[
+  "..0000..",".000000.","00.00.00","00000000","0.0000.0","00....00",".000000.","..0000.."],[
+  "..0000..",".000000.","00000000","00000000","0.0000.0","00....00",".000000.","..0000.."]]},
+ zzz:{n:"Sommeil",pal:["#5b8dd9","#2f4f7a"],f:[[
+  "0000....","...0....","..0.....","0000....","....111.","......1.",".....1..","....111."],[
+  "........","0000....","...0....","..0.....","0000....","....111.","......1.",".....1.."],[
+  "....111.","........","0000....","...0....","..0.....","0000....","........","........"]]},
+ flamme:{n:"Flamme",pal:["#c2410c","#f59e0b","#fde68a"],f:[[
+  "....0...","...00...","..0110..",".011110.",".011210.","01122110","01222210",".012210."],[
+  "...0....","...00...","..0110..",".011110.",".012110.","01122110","01221210",".011210."],[
+  "....0...","..000...","..0110..",".011110.",".011210.","01121110","01222210",".012210."]]},
+ coeur:{n:"Cœur",pal:["#e5484d","#ff8a8f"],f:[[
+  "........",".00..00.","00000000","00010000",".000000.","..0000..","...00...","........"],[
+  "........","..0..0..",".000000.",".000000.","..0000..","...00...","........","........"]]},
+ cafe:{n:"Café",pal:["#e8eaed","#8b5a2b","#7a8899"],f:[[
+  ".2..2...","..22....","00000...","01110.00","01110.0.","01110.00","00000...","........"],[
+  "..2..2..",".2.2....","00000...","01110.00","01110.0.","01110.00","00000...","........"]]},
+ clap:{n:"Clap",pal:["#2b2f3a","#a855f7","#e8eaed"],f:[[
+  "........","20202020","02020202","11111111","11111111","11111111","11111111","........"],[
+  "20202020","02020202","........","11111111","11111111","11111111","11111111","........"]]},
+ tomate:{n:"Pomodoro",pal:["#22c55e","#e5484d"],f:[[
+  "...00...","..000...",".111111.","11111111","11111111","11111111",".111111.","..1111.."]]},
+ check:{n:"Validé",pal:["#22c55e"],f:[[
+  "........","......00",".....00.","0...00..","00.00...",".000....","..0.....","........"]]},
+ croix:{n:"Refus",pal:["#e5484d"],f:[[
+  "00....00","000..000",".000000.","..0000..","..0000..",".000000.","000..000","00....00"]]},
+ sablier:{n:"Sablier",pal:["#7a8899","#fbbf24"],f:[[
+  "00000000","01111110",".011110.","..0110..","..0..0..",".0....0.","01....10","00000000"],[
+  "00000000","0.1111.0",".01110..","..0110..","..01.0..",".0.1..0.","01.1..10","00000000"],[
+  "00000000","0..11..0",".0.11.0.","..0110..","..0110..",".01110.0","01111110","00000000"],[
+  "00000000","0......0",".0....0.","..0110..","..0110..",".011110.","01111110","00000000"]]},
+ cible:{n:"Cible",pal:["#e8eaed","#e5484d"],f:[[
+  "..0000..",".0....0.","0..11..0","0.1111.0","0.1111.0","0..11..0",".0....0.","..0000.."]]},
+ horloge:{n:"Horloge",pal:["#7a8899","#fbbf24"],f:[[
+  "..0000..",".0....0.","0..1...0","0..1...0","0..111.0","0......0",".0....0.","..0000.."],[
+  "..0000..",".0....0.","0......0","0..1...0","0..1110.","0......0",".0....0.","..0000.."]]},
+ pause:{n:"Pause",pal:["#f0b429"],f:[[
+  "........",".00..00.",".00..00.",".00..00.",".00..00.",".00..00.",".00..00.","........"]]},
+ micro:{n:"Micro",pal:["#e8eaed","#7a8899"],f:[[
+  "..0000..","..0000..","..0000..","..0000..",".1....1.","..1111..","...11...","..1111.."]]},
+ fusee:{n:"Fusée",pal:["#e8eaed","#5b8dd9","#f59e0b","#fde68a"],f:[[
+  "...00...","..0000..","..0110..","..0000..",".000000.",".0.00.0.","...22...","..2332.."],[
+  "...00...","..0000..","..0110..","..0000..",".000000.",".0.00.0.","...22...",".23..32."]]},
+ ampoule:{n:"Idée",pal:["#fde68a","#7a8899"],f:[[
+  "..0000..",".000000.","0.0000.0","0.0000.0",".000000.","..1111..","..1111..","...11..."],[
+  "..0000..",".000000.","00000000","00000000",".000000.","..1111..","..1111..","...11..."]]},
+ eclair:{n:"Éclair",pal:["#fbbf24"],f:[[
+  "....00..","...00...","..00....",".00000..","...00...","..00....",".00.....","00......"]]},
+ cadenas:{n:"Verrouillé",pal:["#7a8899","#f0b429","#3a2a00"],f:[[
+  "..0000..",".0....0.",".0....0.","11111111","11111111","11122111","11122111","11111111"]]},
+ pouce:{n:"Pouce levé",pal:["#fbbf24"],f:[[
+  "...00...","..00....","..00....",".0000000","00000000","00000000","00000000",".000000."]]},
+ stop:{n:"Stop",pal:["#e5484d"],f:[[
+  ".0.00.0.","00000000","00000000","00000000","00000000",".000000.","..0000..","..0000.."]]},
+ lune:{n:"Lune",pal:["#cfd6e2"],f:[[
+  "...000..","..00....",".00.....",".00.....",".00.....",".00.....","..00....","...000.."]]},
+ batterie:{n:"Batterie",pal:["#cfd6e2","#22c55e"],f:[[
+  "........","..0000..","00000000","0.1111.0","0.1111.0","0.1111.0","00000000","........"],[
+  "........","..0000..","00000000","0......0","0.1111.0","0.1111.0","00000000","........"]]},
+ note:{n:"Note",pal:["#a855f7"],f:[[
+  "....0000","....0..0","....0.00","....0...","....0...",".000....","00000...",".000...."]]},
+ avion:{n:"Absent",pal:["#5b8dd9"],f:[[
+  "...00...","...00...","..0000..","00000000","00000000","...00...","..0..0..","........"]]},
+};
+function emojiBuf(rows,pal,bri){
+  const p=pal.map(hex2rgb),buf=[];
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const c=rows[y][x];
+    if(c==="."||c===undefined){buf.push([0,0,0]);continue}
+    const col=p[parseInt(c,16)]||[255,255,255];
+    buf.push(col.map(v=>Math.round(clamp(v*bri,0,255))));
+  }
+  return buf;
+}
+
+// ===========================================================================
+//  Niveaux
+// ===========================================================================
+const PAL={deep:[[8,0,0],[95,8,2],[190,38,8]],
+  editing:[[6,0,12],[70,10,130],[168,70,255]],
+  working:[[22,14,0],[175,115,0],[250,215,80]],
+  free:[[0,8,3],[0,80,30],[40,180,85]],
+  offline:[[0,0,0],[3,3,4],[8,9,11]]};
+const META={deep:["#e5484d","Deep","Deep focus"],editing:["#a855f7","Montage","Montage en cours"],
+  working:["#f0b429","Travail","Au travail"],free:["#2ea043","Dispo","Disponible"],
+  offline:["#3a424c","Éteint","Hors ligne"]};
+const KEYS=Object.keys(META);
+
+const DEFAULTS=()=>({
+  panel:{
+    deep:   {anim:"ember", speed:1.0,amp:.70,ctr:1.0,bp:9, bd:.30,stops:PAL.deep.map(c=>[...c])},
+    editing:{anim:"spiral",speed:.85,amp:.70,ctr:1.2,bp:0, bd:0,  stops:PAL.editing.map(c=>[...c])},
+    working:{anim:"aurora",speed:1.0,amp:.75,ctr:1.1,bp:7, bd:.25,stops:PAL.working.map(c=>[...c])},
+    free:   {anim:"drift", speed:.55,amp:.55,ctr:.9, bp:12,bd:.35,stops:PAL.free.map(c=>[...c])},
+    offline:{anim:"solid", speed:.30,amp:.20,ctr:.6, bp:0, bd:0,  stops:PAL.offline.map(c=>[...c])},
+  },
+  dome:{
+    deep:   {anim:"swell", speed:.55,amp:.85,ctr:1.0,bp:0,bd:0,stops:PAL.deep.map(c=>[...c])},
+    editing:{anim:"ripple",speed:.80,amp:.60,ctr:1.0,bp:0,bd:0,stops:PAL.editing.map(c=>[...c])},
+    working:{anim:"pulse", speed:1.0,amp:.70,ctr:1.0,bp:0,bd:0,stops:PAL.working.map(c=>[...c])},
+    free:   {anim:"candle",speed:.50,amp:.25,ctr:1.0,bp:0,bd:0,stops:PAL.free.map(c=>[...c])},
+    offline:{anim:"steady",speed:.30,amp:.10,ctr:1.0,bp:0,bd:0,stops:PAL.offline.map(c=>[...c])},
+  },
+});
+let S=DEFAULTS(), W=JSON.parse(JSON.stringify(E));
+let G={view:"anim",mode:"panel",bri:.35,progress:.62,ring:true,mapping:"row",rot:0,
+       chase:false,sigma:1.5,pkg:true};
+let cur="deep", level="editing", task="Montage épisode 12", dur=50;
+let eCur="casque", eSpd=1, eAnim=true, palIdx=0;
+
+function ramp(st,t){
+  t=clamp(t,0,1); const s=t<.5?0:1,k=t<.5?t*2:(t-.5)*2;
+  const a=st[s],b=st[s+1];
+  return [a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,a[2]+(b[2]-a[2])*k];
+}
+// Luminosité maîtresse LINÉAIRE : une WS2812 l'est sur ses 8 bits.
+function render(t,state){
+  const cfg=S[G.mode][state], pack=G.mode==="dome"?ANIMS_DOME:ANIMS_PANEL;
+  const fn=pack[cfg.anim]||Object.values(pack)[0];
+  const buf=new Array(N*N).fill(0).map(()=>[0,0,0]);
+  let breath=1;
+  if(cfg.bp>0&&cfg.bd>0){
+    const w=.5-.5*Math.cos(2*Math.PI*((t%cfg.bp)/cfg.bp));
+    breath=1-cfg.bd*(1-w);
+  }
+  const gain=G.bri*breath;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const [rx,ry]=rot(x,y,G.rot);
+    let f=fn(rx,ry,t*cfg.speed,cfg.amp);
+    f=clamp((f-.5)*cfg.ctr+.5,0,1);
+    const c=ramp(cfg.stops,f);
+    buf[ledIndex(x,y,G.mapping)]=[c[0]*gain,c[1]*gain,c[2]*gain]
+      .map(v=>Math.round(clamp(v,0,255)));
+  }
+  if(G.ring&&G.mode==="panel"&&state!=="offline"){
+    const lit=Math.round(RING.length*G.progress);
+    RING.forEach(([x,y],i)=>{if(i>=lit){const j=ledIndex(x,y,G.mapping);
+      buf[j]=buf[j].map(v=>Math.round(v*.14))}});
+  }
+  return buf;
+}
+function blur(buf,sigma,mapping){
+  const g=[];
+  for(let y=0;y<N;y++){const r=[];for(let x=0;x<N;x++)r.push(buf[ledIndex(x,y,mapping)]);g.push(r)}
+  const out=[];
+  for(let y=0;y<N;y++){const r=[];
+    for(let x=0;x<N;x++){
+      const s=[0,0,0]; let w=0;
+      for(let j=0;j<N;j++)for(let i=0;i<N;i++){
+        const k=Math.exp(-(((x-i)*(x-i)+(y-j)*(y-j)))/(2*sigma*sigma));
+        s[0]+=g[j][i][0]*k;s[1]+=g[j][i][1]*k;s[2]+=g[j][i][2]*k;w+=k;
+      }
+      r.push([s[0]/w,s[1]/w,s[2]/w]);
+    } out.push(r)}
+  return out;
+}
+function radialProfile(grid){
+  const p=[];
+  for(let i=0;i<=24;i++){
+    const gx=clamp(3.5+i/24*3.5,0,7),x0=Math.floor(gx),x1=Math.min(x0+1,7),f=gx-x0;
+    p.push([0,1,2].map(k=>grid[3][x0][k]*(1-f)+grid[3][x1][k]*f));
+  }
+  return p;
+}
+
+// ===========================================================================
+//  Rendus
+// ===========================================================================
+function paintGrid(ctx,buf,size,mapping,pkg){
+  const pad=size*.055,cell=(size-pad*2)/N,S2=cell*.72,R=S2*.16;
+  ctx.fillStyle="#080a0d"; ctx.fillRect(0,0,size,size);
+  const rr=(x,y,w,h,r)=>{ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else ctx.rect(x,y,w,h)};
+  // Une WS2812 éteinte est un carré de plastique gris, pas un trou noir.
+  if(pkg) for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const bx=pad+cell*x+(cell-S2)/2,by=pad+cell*y+(cell-S2)/2;
+    const g=ctx.createLinearGradient(bx,by,bx+S2,by+S2);
+    g.addColorStop(0,"#2f343a"); g.addColorStop(1,"#1c2025");
+    rr(bx,by,S2,S2,R); ctx.fillStyle=g; ctx.fill();
+    ctx.fillStyle="#15181c"; ctx.fillRect(bx+S2*.27,by+S2*.27,S2*.46,S2*.46);
+  }
+  ctx.globalCompositeOperation="lighter";
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const p=buf[ledIndex(x,y,mapping)],lum=(p[0]+p[1]+p[2])/3;
+    if(lum<3)continue;
+    const cx=pad+cell*(x+.5),cy=pad+cell*(y+.5),rad=cell*1.5;
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+    g.addColorStop(0,`rgba(${p[0]},${p[1]},${p[2]},${Math.min(.88,lum/70)})`);
+    g.addColorStop(.45,`rgba(${p[0]},${p[1]},${p[2]},${Math.min(.32,lum/190)})`);
+    g.addColorStop(1,`rgba(${p[0]},${p[1]},${p[2]},0)`);
+    ctx.fillStyle=g; ctx.fillRect(cx-rad,cy-rad,rad*2,rad*2);
+  }
+  ctx.globalCompositeOperation="source-over";
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const p=buf[ledIndex(x,y,mapping)],lum=(p[0]+p[1]+p[2])/3;
+    if(lum<3&&pkg)continue;
+    const bx=pad+cell*x+(cell-S2)/2,by=pad+cell*y+(cell-S2)/2;
+    rr(bx,by,S2,S2,R);
+    ctx.fillStyle=`rgb(${p.map(v=>Math.round(Math.min(255,v*1.5+(pkg?16:6)))).join(",")})`;
+    ctx.fill();
+  }
+}
+const _off=document.createElement("canvas"); _off.width=230; _off.height=132;
+const _octx=_off.getContext("2d");
+function paintDome(ctx,grid,size){
+  const prof=radialProfile(grid);
+  const mc=[0,1,2].map(k=>{let s=0;
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++)s+=grid[y][x][k];return s/64});
+  ctx.fillStyle="#05070a"; ctx.fillRect(0,0,size,size);
+  const cx=size*.5,baseY=size*.735,R=size*.29,rgb=mc.map(v=>Math.round(v)).join(",");
+  ctx.globalCompositeOperation="lighter";
+  let g=ctx.createRadialGradient(cx,baseY,R*.2,cx,baseY,R*3.1);
+  g.addColorStop(0,`rgba(${rgb},.30)`); g.addColorStop(1,"rgba(0,0,0,0)");
+  ctx.fillStyle=g; ctx.save(); ctx.translate(cx,baseY); ctx.scale(1,.3);
+  ctx.beginPath(); ctx.arc(0,0,R*3.1,0,7); ctx.fill(); ctx.restore();
+  g=ctx.createRadialGradient(cx,baseY-R*.45,R*.3,cx,baseY-R*.45,R*2.3);
+  g.addColorStop(0,`rgba(${rgb},.26)`); g.addColorStop(1,"rgba(0,0,0,0)");
+  ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
+  ctx.globalCompositeOperation="source-over";
+  const Wp=_off.width,Hp=_off.height,img=_octx.createImageData(Wp,Hp),d=img.data;
+  for(let py=0;py<Hp;py++)for(let px=0;px<Wp;px++){
+    const nx=(px-Wp/2)/(Wp/2),ny=(Hp-1-py)/Hp,o=(py*Wp+px)*4;
+    if(nx*nx+ny*ny>1){d[o+3]=0;continue}
+    const z=Math.sqrt(Math.max(0,1-nx*nx-ny*ny));
+    const c=prof[Math.min(24,Math.round(Math.sqrt(Math.max(0,1-ny*ny))*24))];
+    const limb=.72+.5*(1-z);
+    const spec=Math.pow(Math.max(0,1-Math.hypot(nx+.36,ny-.62)*1.55),3)*38;
+    d[o]=clamp(c[0]*limb+spec,0,255); d[o+1]=clamp(c[1]*limb+spec,0,255);
+    d[o+2]=clamp(c[2]*limb+spec*1.12,0,255); d[o+3]=255;
+  }
+  _octx.putImageData(img,0,0);
+  ctx.drawImage(_off,cx-R,baseY-R*(Hp/(Wp/2)),R*2,R*(Hp/(Wp/2)));
+  ctx.fillStyle="#0e1217";
+  ctx.beginPath(); ctx.ellipse(cx,baseY,R*1.03,R*.16,0,0,7); ctx.fill();
+  ctx.strokeStyle="#262e37"; ctx.lineWidth=size*.003;
+  ctx.beginPath(); ctx.ellipse(cx,baseY,R*1.03,R*.16,0,0,7); ctx.stroke();
+}
+function paintAuto(ctx,buf,size){
+  if(G.view==="anim"&&G.mode==="dome") paintDome(ctx,blur(buf,G.sigma,G.mapping),size);
+  else paintGrid(ctx,buf,size,G.mapping,G.pkg);
+}
+
+// ===========================================================================
+//  Interface
+// ===========================================================================
+const $=id=>document.getElementById(id);
+const mainCtx=$("main").getContext("2d"), rhyCtx=$("rhythm").getContext("2d");
+
+function buildLevels(){
+  const w=$("lvls"); w.innerHTML="";
+  for(const k of KEYS){
+    const b=document.createElement("button");
+    b.innerHTML=`<i style="background:${META[k][0]};color:${META[k][0]}"></i>${META[k][1]}`;
+    b.title=META[k][2];
+    if(k===level)b.classList.add("on");
+    b.onclick=()=>{level=k;cur=k;buildLevels();buildTabs();pull();pushLevel()};
+    w.appendChild(b);
+  }
+}
+function buildTabs(){
+  const t=$("tabs"); t.innerHTML="";
+  for(const k of KEYS){
+    const b=document.createElement("button");
+    b.textContent=META[k][1];
+    if(k===cur)b.className="on";
+    b.onclick=()=>{cur=k;buildTabs();pull()};
+    t.appendChild(b);
+  }
+}
+const cmpCtx={};
+function buildCmp(){
+  const c=$("cmp"); c.innerHTML="";
+  for(const k of KEYS){
+    const f=document.createElement("figure");
+    const cv=document.createElement("canvas"); cv.width=cv.height=200; f.appendChild(cv);
+    const cap=document.createElement("figcaption"); cap.textContent=META[k][1];
+    f.appendChild(cap); c.appendChild(f); cmpCtx[k]=cv.getContext("2d");
+  }
+}
+const galCtx={};
+function buildGal(){
+  const g=$("gal"); g.innerHTML="";
+  for(const k in W){
+    const f=document.createElement("figure");
+    if(k===eCur)f.className="on";
+    const cv=document.createElement("canvas"); cv.width=cv.height=170; f.appendChild(cv);
+    const cap=document.createElement("figcaption"); cap.textContent=W[k].n; f.appendChild(cap);
+    f.onclick=()=>{eCur=k;palIdx=0;buildGal();buildSwatches();emit()};
+    g.appendChild(f); galCtx[k]=cv.getContext("2d");
+  }
+}
+function buildEditor(){
+  const e=$("edit"); e.innerHTML="";
+  for(let i=0;i<64;i++){
+    const d=document.createElement("div");
+    d.onclick=()=>{
+      const o=W[eCur],fi=eFrame(performance.now()/1000),y=(i/8)|0,x=i%8;
+      const ch=palIdx<0?".":palIdx.toString(16);
+      o.f[fi][y]=o.f[fi][y].slice(0,x)+ch+o.f[fi][y].slice(x+1); emit();
+    };
+    e.appendChild(d);
+  }
+}
+function buildSwatches(){
+  const s=$("sw"); s.innerHTML="";
+  const off=document.createElement("button");
+  off.style.background="repeating-linear-gradient(45deg,#1a1e23 0 5px,#0d1013 5px 10px)";
+  off.title="éteindre"; if(palIdx<0)off.className="on";
+  off.onclick=()=>{palIdx=-1;buildSwatches()}; s.appendChild(off);
+  W[eCur].pal.forEach((c,i)=>{
+    const b=document.createElement("button"); b.style.background=c;
+    if(palIdx===i)b.className="on";
+    b.onclick=()=>{palIdx=i;buildSwatches()}; s.appendChild(b);
+  });
+}
+function fillAnims(){
+  const pack=G.mode==="dome"?ANIMS_DOME:ANIMS_PANEL,s=$("anim"); s.innerHTML="";
+  for(const k in pack){const o=document.createElement("option");
+    o.value=k;o.textContent=FR[k]||k;s.appendChild(o)}
+}
+const BIND=[["speed","speed",.01,v=>v.toFixed(2)+"×"],["amp","amp",.01,v=>Math.round(v*100)+"%"],
+  ["ctr","ctr",.01,v=>v.toFixed(2)],["bp","bp",.1,v=>v?v.toFixed(1)+"s":"off"],
+  ["bd","bd",.01,v=>Math.round(v*100)+"%"]];
+function pull(){
+  const c=S[G.mode][cur];
+  fillAnims(); $("anim").value=c.anim;
+  for(const b of BIND){$(b[0]).value=Math.round(c[b[1]]/b[2]);
+    $("v"+b[0]).textContent=b[3](c[b[1]])}
+  [0,1,2].forEach(i=>$("c"+i).value=rgb2hex(c.stops[i]));
+  emit();
+}
+$("anim").onchange=e=>{S[G.mode][cur].anim=e.target.value;emit()};
+for(const b of BIND) $(b[0]).oninput=e=>{S[G.mode][cur][b[1]]=e.target.value*b[2];
+  $("v"+b[0]).textContent=b[3](S[G.mode][cur][b[1]]);emit()};
+[0,1,2].forEach(i=>$("c"+i).oninput=e=>{S[G.mode][cur].stops[i]=hex2rgb(e.target.value);emit()});
+$("task").oninput=e=>{task=e.target.value};
+$("dur").oninput=e=>{dur=+e.target.value;$("vdur").textContent=dur+" min"};
+$("vdur").textContent=dur+" min";
+$("espd").oninput=e=>{eSpd=e.target.value/100;$("vespd").textContent=eSpd.toFixed(2)+"×"};
+$("vespd").textContent="1.00×";
+$("eanim").onchange=e=>eAnim=e.target.checked;
+$("epkg").onchange=e=>G.pkg=e.target.checked;
+$("eReset").onclick=()=>{W[eCur]=JSON.parse(JSON.stringify(E[eCur]));buildSwatches();emit()};
+
+function gslider(id,key,sc,fmt){
+  const el=$(id),o=$("v"+id);
+  const f=()=>{G[key]=el.value*sc;o.textContent=fmt(G[key]);emit()};
+  el.oninput=f; f();
+}
+gslider("bri","bri",.01,v=>Math.round(v*100)+"%");
+gslider("prg","progress",.01,v=>Math.round(v*100)+"%");
+gslider("sig","sigma",.01,v=>{
+  $("sigNote").textContent=`≈ coupole opale de ${Math.round(18+v*22)} mm. Au-delà de `
+    +`2,5× la largeur de la matrice, le mélange est total.`;
+  return v.toFixed(2);
+});
+$("ring").onchange=e=>{G.ring=e.target.checked;emit()};
+$("chase").onchange=e=>G.chase=e.target.checked;
+$("reset").onclick=()=>{S=DEFAULTS();W=JSON.parse(JSON.stringify(E));
+  buildTabs();buildGal();buildSwatches();pull()};
+$("copy").onclick=async()=>{
+  try{await navigator.clipboard.writeText($("out").textContent);$("copy").textContent="Copié"}
+  catch(e){$("copy").textContent="Sélectionne et copie à la main"}
+  setTimeout(()=>{$("copy").textContent="Copier"},1600);
+};
+$("viewSeg").onclick=e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  [...e.currentTarget.children].forEach(c=>c.classList.remove("on"));
+  e.target.classList.add("on"); G.view=e.target.dataset.v;
+  const em=G.view==="emoji", ck=G.view==="clock", an=G.view==="anim";
+  $("primAnim").hidden=!an; $("primEmoji").hidden=!em; $("primClock").hidden=!ck;
+  $("dAnim").hidden=!an; $("dOptic").hidden=!an; $("dAnalyse").hidden=!an;
+  $("dEmoji").hidden=!em; $("dClock").hidden=!ck;
+  emit();
+};
+$("modeSeg").onclick=e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  [...e.currentTarget.children].forEach(c=>c.classList.remove("on"));
+  e.target.classList.add("on"); G.mode=e.target.dataset.v;
+  const dome=G.mode==="dome";
+  $("sigRow").hidden=!dome; $("sigNote").hidden=!dome;
+  $("prgRow").hidden=dome; $("ringRow").hidden=dome;
+  $("sumOptic").textContent=dome?"dôme diffusant":"dalle nue";
+  pull();
+};
+$("mapSeg").onclick=e=>{if(e.target.tagName!=="BUTTON")return;
+  [...e.currentTarget.children].forEach(c=>c.classList.remove("on"));
+  e.target.classList.add("on");G.mapping=e.target.dataset.v;emit()};
+$("rotSeg").onclick=e=>{if(e.target.tagName!=="BUTTON")return;
+  [...e.currentTarget.children].forEach(c=>c.classList.remove("on"));
+  e.target.classList.add("on");G.rot=Number(e.target.dataset.v);emit()};
+
+function pyEmoji(k){
+  const o=W[k],pal=o.pal.map(c=>"("+hex2rgb(c).join(",")+")").join(", ");
+  const fr=o.f.map(f=>"        ("+f.map(r=>`"${r}"`).join(",\n         ")+"),").join("\n");
+  return `    "${k}": {"name": ${JSON.stringify(o.n)},\n        "pal": (${pal}),\n`
+       + `        "frames": (\n${fr}\n        )},`;
+}
+function emit(){
+  $("sumHw").textContent=(G.mapping==="row"?"lignes":"serpentin")+" · "+G.rot+"°";
+  if(G.view==="clock"){
+    $("sumClock").textContent=CLOCK_FR[clockMode];
+    $("curName").textContent="Horloge · "+CLOCK_FR[clockMode];
+    $("out").textContent=`CLOCK_MODE = "${clockMode}"   # digits | binary | ring | scroll | ambient\n`
+      +`CLOCK_TINT = "${clockTint}"    # level = suit le niveau, fixed = couleurs figees\n`
+      +`CLOCK_24H  = ${$("sec24").checked?"True":"False"}\n`
+      +`TZ_RULE    = "EU"          # bascule au dernier dimanche de mars et d'octobre`;
+    return;
+  }
+  if(G.view==="emoji"){
+    $("out").textContent="EMOJI = {\n"+Object.keys(W).map(pyEmoji).join("\n")+"\n}";
+    $("curName").textContent=W[eCur].n;
+    $("sumEmoji").textContent=W[eCur].n;
+    return;
+  }
+  const c=S[G.mode][cur];
+  $("sumAnim").textContent=META[cur][1]+" · "+(FR[c.anim]||c.anim);
+  const blk=m=>KEYS.map(k=>{const q=S[m][k];
+    return `    "${k}": {"anim":"${q.anim}", "speed":${q.speed.toFixed(2)}, `+
+      `"amp":${q.amp.toFixed(2)}, "ctr":${q.ctr.toFixed(2)},\n`+
+      `             "bp":${q.bp.toFixed(1)}, "bd":${q.bd.toFixed(2)},\n`+
+      `             "stops":(${q.stops.map(s=>"("+s.map(v=>Math.round(v)).join(",")+")").join(", ")})},`
+  }).join("\n");
+  $("curName").textContent=META[level][2];
+  $("out").textContent =
+`MODE           = "${G.mode}"
+MAX_BRIGHTNESS = ${G.bri.toFixed(2)}   # LINEAIRE, surtout pas de gamma
+MAPPING        = "${G.mapping}"
+SHOW_RING      = ${G.ring&&G.mode==="panel"?"True":"False"}
+
+STATES_PANEL = {
+${blk("panel")}
+}
+
+STATES_DOME = {
+${blk("dome")}
+}`;
+}
+function drawRhythm(t){
+  const Wc=1000,H=192,SPAN=20;
+  rhyCtx.fillStyle="#05070a"; rhyCtx.fillRect(0,0,Wc,H);
+  rhyCtx.strokeStyle="#1a212a"; rhyCtx.lineWidth=1;
+  for(let s=0;s<=SPAN;s+=5){const x=s/SPAN*Wc;
+    rhyCtx.beginPath();rhyCtx.moveTo(x,0);rhyCtx.lineTo(x,H);rhyCtx.stroke()}
+  for(const k of KEYS){
+    rhyCtx.strokeStyle=META[k][0]; rhyCtx.lineWidth=2.4; rhyCtx.beginPath();
+    for(let i=0;i<=200;i++){
+      const m=meanLum(render(t+(i/200)*SPAN,k))/Math.max(255*G.bri,1);
+      const x=i/200*Wc,y=H-8-clamp(m,0,1)*(H-18);
+      i?rhyCtx.lineTo(x,y):rhyCtx.moveTo(x,y);
+    }
+    rhyCtx.stroke();
+  }
+}
+const eFrame=t=>Math.floor(t*eSpd*2.2)%W[eCur].f.length;
+
+// ===========================================================================
+//  Horloge — cinq modes, transposés tels quels dans le firmware
+// ===========================================================================
+const F35={
+ "0":["111","101","101","101","111"],"1":["010","110","010","010","111"],
+ "2":["111","001","111","100","111"],"3":["111","001","111","001","111"],
+ "4":["101","101","111","001","001"],"5":["111","100","111","001","111"],
+ "6":["111","100","111","101","111"],"7":["111","001","001","001","001"],
+ "8":["111","101","111","101","111"],"9":["111","101","111","001","111"],
+ ":":["0","1","0","1","0"]};
+// Anneau réordonné pour que midi tombe en haut au centre.
+const CRING=RING.slice(4).concat(RING.slice(0,4));
+const cblank=()=>Array.from({length:64},()=>[0,0,0]);
+const cput=(b,x,y,c)=>{if(x>=0&&x<N&&y>=0&&y<N)b[y*N+x]=[...c]};
+const cmix=(a,b,k)=>[0,1,2].map(i=>a[i]+(b[i]-a[i])*k);
+const cdim=(c,k)=>c.map(v=>Math.round(clamp(v*k,0,255)));
+function cglyph(b,ch,ox,oy,col){
+  const g=F35[ch]; if(!g)return 0;
+  for(let y=0;y<5;y++)for(let x=0;x<g[y].length;x++)
+    if(g[y][x]==="1")cput(b,ox+x,oy+y,col);
+  return g[0].length;
+}
+const CLOCK={
+  // Heures et minutes superposées, chacune dans sa couleur, le recouvrement
+  // dans une troisième. On lit les deux nombres d'un seul coup d'œil sur 64
+  // pixels au lieu d'alterner.
+  //
+  // Décalages mesurés sur les 1440 minutes du jour, pas choisis à l'œil :
+  //   dy=3  heures sur les lignes 0-4, minutes sur 3-7 : seules deux lignes
+  //         peuvent se recouvrir.
+  //   dx=1  les minutes glissent d'une colonne : le recouvrement moyen tombe
+  //         de 5,2 à 3,0 pixels et le pire cas de 8 à 6. Décaler vers la
+  //         gauche ferait mieux encore, mais tronquerait les minutes hors
+  //         grille à chaque affichage.
+  // Chaque nombre garde ainsi toujours au moins 10 pixels dans sa couleur
+  // propre. En superposition exacte, le pire cas tombait à zéro : le nombre
+  // disparaissait entièrement dans la couleur de recouvrement.
+  overlay(b,tc,col){
+    const H=col[0], M=col[1], X=col[2]||[240,240,255];
+    const hit=Array.from({length:64},()=>0);
+    const stamp=(v,ox0,oy,bit)=>{
+      [[Math.floor(v/10),0],[v%10,4]].forEach(([dg,ox])=>{
+        const g=F35[String(dg)];
+        for(let y=0;y<5;y++)for(let x=0;x<3;x++){
+          const X2=ox0+ox+x, Y2=oy+y;
+          if(g[y][x]==="1"&&X2<N&&Y2<N) hit[Y2*N+X2]|=bit;
+        }
+      });
+    };
+    stamp(tc.h,0,0,1); stamp(tc.m,1,3,2);
+    for(let i=0;i<64;i++){
+      if(hit[i]===3) b[i]=[...X];
+      else if(hit[i]===1) b[i]=[...H];
+      else if(hit[i]===2) b[i]=[...M];
+    }
+    // Les colonnes 3 et 4 tombent pile entre les deux chiffres de chaque
+    // nombre : on y place les deux-points d'une horloge numérique. Ils
+    // clignotent à la seconde, ce qui signale aussi que rien n'est figé.
+    const k=.25+.75*Math.abs(Math.cos(Math.PI*(tc.s+tc.ms/1000)));
+    cput(b,3,0,cdim(H,k*.9)); cput(b,3,2,cdim(H,k*.9));
+    cput(b,4,5,cdim(M,k*.9)); cput(b,4,7,cdim(M,k*.9));
+  },
+  digits(b,tc,col){
+    const showH=Math.floor((tc.s+tc.ms/1000)/2.5)%2===0;
+    const v=showH?tc.h:tc.m, inC=((tc.s+tc.ms/1000)%2.5);
+    const fade=inC<.35?inC/.35:(inC>2.15?(2.5-inC)/.35:1);
+    const c=cdim(col[0],clamp(fade,.12,1));
+    cglyph(b,String(Math.floor(v/10)),0,1,c); cglyph(b,String(v%10),4,1,c);
+    if(tc.s%2===0)cput(b,7,7,cdim(col[1],.9));
+    cput(b,0,7,cdim(col[1],showH?.85:.25));
+    cput(b,1,7,cdim(col[1],showH?.25:.85));
+  },
+  binary(b,tc,col){
+    const cols=[[Math.floor(tc.h/10),2],[tc.h%10,4],[Math.floor(tc.m/10),3],
+                [tc.m%10,4],[Math.floor(tc.s/10),3],[tc.s%10,4]];
+    const xs=[0,1,3,4,6,7];
+    cols.forEach(([val,bits],i)=>{
+      const c=i<2?col[0]:(i<4?col[1]:cmix(col[0],col[1],.5));
+      for(let k=0;k<bits;k++) cput(b,xs[i],7-k,((val>>k)&1)?c:cdim(c,.07));
+    });
+  },
+  ring(b,tc,col){
+    const P=CRING.length;
+    const hf=((tc.h%12)+tc.m/60)/12, mf=(tc.m+tc.s/60)/60, sf=(tc.s+tc.ms/1000)/60;
+    CRING.forEach(([x,y],i)=>cput(b,x,y,cdim(col[1],i%7===0?.16:.05)));
+    const sec=col[2]||cmix(col[0],col[1],.6);
+    const sp=sf*P,si=Math.floor(sp)%P,sk=sp-Math.floor(sp);
+    cput(b,...CRING[si],cdim(sec,.45*(1-sk)));
+    cput(b,...CRING[(si+1)%P],cdim(sec,.45*sk));
+    const mp=Math.round(mf*P)%P;
+    cput(b,...CRING[mp],col[1]); cput(b,...CRING[(mp+1)%P],cdim(col[1],.4));
+    const hp=Math.round(hf*P)%P;
+    for(let d=-1;d<=1;d++) cput(b,...CRING[(hp+d+P)%P],cdim(col[0],d===0?1:.55));
+    const beat=.25+.2*Math.cos(2*Math.PI*(tc.ms/1000));
+    for(const [x,y] of [[3,3],[4,3],[3,4],[4,4]]) cput(b,x,y,cdim(col[0],beat));
+  },
+  scroll(b,tc,col){
+    const txt=String(tc.h).padStart(2,"0")+":"+String(tc.m).padStart(2,"0");
+    let w=0; for(const ch of txt) w+=(F35[ch]?F35[ch][0].length:3)+1;
+    // Écart court et trois passages : avec un seul, le cadran devient noir
+    // pendant une seconde et donne l'impression d'être en panne.
+    const total=w+2, off=N-Math.floor(((tc.s+tc.ms/1000)*3.5)%total);
+    for(const base of [off-total,off,off+total]){
+      let x=base; for(const ch of txt) x+=cglyph(b,ch,x,1,col[0])+1;
+    }
+    if(tc.s%2===0)cput(b,7,7,cdim(col[1],.8));
+  },
+  ambient(b,tc,col){
+    const dayf=(tc.h*3600+tc.m*60+tc.s)/86400, minf=(tc.m+tc.s/60)/60;
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+      const filled=(N-1-y)/(N-1)<=minf?1:.10;
+      cput(b,x,y,cdim(cmix(col[1],col[0],clamp(.35+.65*dayf,0,1)),
+        filled*(.35+.65*(x+y)/14)));
+    }
+    cput(b,7,Math.min(7,Math.floor((tc.h%12)/12*8)),col[0]);
+  },
+};
+const CLOCK_FR={overlay:"Superposé",digits:"Chiffres",binary:"Binaire",
+  ring:"Aiguilles",scroll:"Défilé",ambient:"Ambiance"};
+let clockMode="overlay", clockTint="fixed";
+
+function clockColors(){
+  if(clockTint==="fixed")
+    return [hex2rgb($("k0").value),hex2rgb($("k1").value),hex2rgb($("k2").value)];
+  const st=S[G.mode][level].stops;
+  return [st[2],st[1],cmix(st[2],st[1],.6)];
+}
+function renderClock(){
+  const d=new Date();
+  const tc={h:$("sec24").checked?d.getHours():(d.getHours()%12||12),
+            m:d.getMinutes(),s:d.getSeconds(),ms:d.getMilliseconds()};
+  const buf=cblank();
+  (CLOCK[clockMode]||CLOCK.digits)(buf,tc,clockColors());
+  // la luminosité maîtresse s'applique ici, linéairement
+  return buf.map(p=>p.map(v=>Math.round(clamp(v*G.bri,0,255))));
+}
+function buildClockModes(){
+  const w=$("clockModes"); w.innerHTML="";
+  for(const k in CLOCK){
+    const b=document.createElement("button");
+    b.innerHTML=`<i style="background:#5b8dd9;color:#5b8dd9"></i>${CLOCK_FR[k]}`;
+    if(k===clockMode)b.classList.add("on");
+    b.onclick=()=>{clockMode=k;buildClockModes();emit()};
+    w.appendChild(b);
+  }
+}
+$("clockTint").onclick=e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  [...e.currentTarget.children].forEach(c=>c.classList.remove("on"));
+  e.target.classList.add("on"); clockTint=e.target.dataset.v;
+  $("clockStops").style.opacity=clockTint==="fixed"?"1":".35";
+};
+$("syncTime").onclick=async()=>{
+  if(!writer){stat("carte non connectée",false);return}
+  await send("T"+Math.floor(Date.now()/1000)+"\n");
+  stat("heure envoyée",true);
+};
+
+// ===========================================================================
+//  Web Serial
+// ===========================================================================
+let port=null,writer=null,lastSend=0,sending=false,sent=0,errs=0,handedOver=false;
+const HEX=[]; for(let i=0;i<256;i++)HEX.push(i.toString(16).padStart(2,"0"));
+
+// Ordre LOGIQUE : c'est le firmware qui applique rotation et serpentin via sa
+// table LUT, pour que la calibration ne vive qu'à un endroit, config.py.
+// La somme de contrôle rejette les trames recollées quand le navigateur gèle
+// l'écriture en passant en arrière-plan — c'est ce qui blanchissait la dalle.
+function frameHex(buf){
+  let s="F",x=0;
+  for(let y=0;y<N;y++)for(let px=0;px<N;px++){
+    const p=buf[ledIndex(px,y,G.mapping)];
+    s+=HEX[p[0]]+HEX[p[1]]+HEX[p[2]];
+    x^=p[0]; x^=p[1]; x^=p[2];
+  }
+  return s+HEX[x]+"\n";
+}
+function stat(t,up){
+  $("serStat").textContent=t;
+  $("conn").className="pill"+(up?" up":"");
+  $("sumSerial").textContent=t;
+}
+async function send(txt){
+  if(!writer)return;
+  try{await writer.write(new TextEncoder().encode(txt))}
+  catch(e){errs++;stat("erreur d'écriture",false)}
+}
+function pushLevel(){ if(writer&&!handedOver) send("L"+level+"\n") }
+
+$("conn").onclick=async()=>{
+  if(port){ $("dSerial").open=!$("dSerial").open; return }
+  if(!("serial" in navigator)){stat("Chrome ou Edge requis",false);return}
+  try{
+    port=await navigator.serial.requestPort();
+    await port.open({baudRate:115200});
+    // Certaines combinaisons DTR/RTS relancent l'ESP32-S3 en bootloader.
+    try{await port.setSignals({dataTerminalReady:false,requestToSend:false})}catch(e){}
+    writer=port.writable.getWriter();
+    stat("connectée",true); readLoop(); await send("?\n");
+  }catch(e){stat("connexion refusée",false);port=null}
+};
+async function readLoop(){
+  const dec=new TextDecoder(); let acc="";
+  try{
+    const reader=port.readable.getReader();
+    while(true){
+      const {value,done}=await reader.read(); if(done)break;
+      acc+=dec.decode(value,{stream:true});
+      let i;
+      while((i=acc.indexOf("\n"))>=0){
+        const line=acc.slice(0,i).trim(); acc=acc.slice(i+1);
+        if(line.startsWith("FOCUS")) stat(line.slice(6),true);
+      }
+      if(acc.length>4000)acc="";
+    }
+  }catch(e){}
+}
+$("disc").onclick=async()=>{
+  try{if(writer)writer.releaseLock(); if(port)await port.close()}catch(e){}
+  port=null;writer=null;handedOver=false;stat("connecter la carte",false);
+};
+$("push").onclick=async()=>{
+  if(!writer){stat("carte non connectée",false);return}
+  const pack=m=>{const o={};
+    for(const k of KEYS){const q=S[m][k];
+      o[k]={anim:q.anim,speed:+q.speed.toFixed(2),amp:+q.amp.toFixed(2),
+            ctr:+q.ctr.toFixed(2),bp:+q.bp.toFixed(1),bd:+q.bd.toFixed(2),
+            stops:q.stops.map(s=>s.map(v=>Math.round(v)))}}
+    return o};
+  await send("C"+JSON.stringify({panel:pack("panel"),dome:pack("dome")})+"\n");
+  await send("B"+Math.round(G.bri*100)+"\n");
+  await send("P"+Math.round(G.progress*100)+"\n");
+  await send("L"+level+"\n");
+  stat("réglages enregistrés",true);
+};
+// Le try/finally est indispensable : sans lui, une écriture interrompue par la
+// mise en arrière-plan laisse le verrou coincé et la diffusion ne repart jamais.
+async function streamFrame(buf,now){
+  if(!writer||!$("live").checked||sending||handedOver)return;
+  if(now-lastSend<40)return;
+  lastSend=now; sending=true;
+  try{
+    await send(frameHex(buf)); sent++;
+    if(sent%50===0) stat(`diffusion · ${sent} trames`,true);
+  } finally { sending=false; }
+}
+
+// Les navigateurs gèlent requestAnimationFrame en arrière-plan. Lutter est
+// perdu d'avance : on rend la main à la carte, qui continue seule.
+async function handOver(){
+  if(!writer||handedOver)return;
+  handedOver=true;
+  await send("L"+level+"\n");
+  if($("hold").checked) await send("H1\n");
+  stat("la carte a repris la main",true);
+}
+async function takeBack(){
+  if(!writer||!handedOver)return;
+  handedOver=false; sending=false;
+  await send("H0\n");
+  stat("diffusion reprise",true);
+}
+document.addEventListener("visibilitychange",()=>{document.hidden?handOver():takeBack()});
+window.addEventListener("blur",handOver);
+window.addEventListener("focus",takeBack);
+window.addEventListener("pagehide",handOver);
+window.addEventListener("beforeunload",()=>{
+  if(writer){send("L"+level+"\n"); if($("hold").checked) send("H1\n")}
+});
+
+// ===========================================================================
+//  Boucle
+// ===========================================================================
+let t0=performance.now(),peak=0,frames=0,lastFps=t0,lastRhy=0;
+function loop(now){
+  const t=(now-t0)/1000;
+  let buf;
+  if(G.chase){
+    buf=new Array(64).fill(0).map(()=>[0,0,0]);
+    buf[Math.floor(t*4)%64]=[190,190,190];
+    paintGrid(mainCtx,buf,760,G.mapping,G.pkg);
+  } else if(G.view==="emoji"){
+    const o=W[eCur],fi=eAnim?eFrame(t):0;
+    buf=emojiBuf(o.f[fi],o.pal,G.bri);
+    paintGrid(mainCtx,buf,760,"row",G.pkg);
+    for(const k in W){const q=W[k],j=eAnim?Math.floor(t*eSpd*2.2)%q.f.length:0;
+      paintGrid(galCtx[k],emojiBuf(q.f[j],q.pal,G.bri),170,"row",G.pkg)}
+    if($("dEmoji").open){
+      const cells=$("edit").children;
+      for(let i=0;i<64;i++){const p=buf[i];
+        cells[i].style.background=(p[0]+p[1]+p[2])<6?"#15191e"
+          :`rgb(${p.map(v=>Math.min(255,Math.round(v*1.6+20))).join(",")})`}
+    }
+  } else if(G.view==="clock"){
+    buf=renderClock();
+    paintGrid(mainCtx,buf,760,"row",G.pkg);
+    const d=new Date();
+    $("clockNow").textContent=[d.getHours(),d.getMinutes(),d.getSeconds()]
+      .map(v=>String(v).padStart(2,"0")).join(":");
+    const off=-d.getTimezoneOffset()/60;
+    $("clockTz").textContent="UTC"+(off>=0?"+":"")+off;
+  } else {
+    buf=render(t,level);
+    paintAuto(mainCtx,buf,760);
+    if($("dAnalyse").open){
+      for(const k of KEYS) paintAuto(cmpCtx[k],render(t,k),200);
+      if(now-lastRhy>200){drawRhythm(t);lastRhy=now}
+    }
+  }
+  streamFrame(buf,now);
+
+  const ma=currentMa(buf); peak=Math.max(peak,ma);
+  const el=$("mA"); el.textContent=ma+" mA"; el.className=ma>450?"hot":"";
+  $("pk").textContent=peak+" mA";
+  frames++;
+  if(now-lastFps>500){$("fps").textContent=Math.round(frames*1000/(now-lastFps));
+    frames=0;lastFps=now}
+  requestAnimationFrame(loop);
+}
+
+buildLevels(); buildTabs(); buildCmp(); buildGal(); buildEditor(); buildSwatches();
+buildClockModes(); $("clockStops").style.opacity="1";
+pull(); requestAnimationFrame(loop);
+</script>
+</html>
